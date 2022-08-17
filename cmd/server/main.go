@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/spf13/viper"
 )
 
@@ -26,5 +26,12 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
-	log.Println(viper.Get("name"))
+	client := redis.NewClient(&redis.Options{
+		Addr:     viper.GetString("redisAddr"),
+		Password: viper.GetString("redisPassword"),
+		DB:       0,
+	})
+
+	pong, err := client.Ping(client.Context()).Result()
+	fmt.Println(pong)
 }
