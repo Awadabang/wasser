@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package worker;
+
+option go_package = "./worker";
+
+message LifeCircleReq {
+    bool register = 1;
+    bool alivecheck = 2; 
+}
+
+message LifeCircleResp {
+   string status = 1; 
+}
+
+message StatusSyncReq {
+    bool fetch = 1;
+}
+
+message StatusSyncResp {
+   string status = 1; 
+}
+
+service Worker {
+    rpc LifeCircle(LifeCircleReq) returns (LifeCircleResp); 
+    rpc StatusSync(StatusSyncReq) returns (StatusSyncResp);
+}
