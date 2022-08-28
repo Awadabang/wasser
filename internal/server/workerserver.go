@@ -4,8 +4,6 @@
 package server
 
 import (
-	"context"
-
 	"github.com/Awadabang/wasser/internal/logic"
 	"github.com/Awadabang/wasser/internal/svc"
 	"github.com/Awadabang/wasser/types/worker"
@@ -22,12 +20,12 @@ func NewWorkerServer(svcCtx *svc.ServiceContext) *WorkerServer {
 	}
 }
 
-func (s *WorkerServer) LifeCircle(ctx context.Context, in *worker.LifeCircleReq) (*worker.LifeCircleResp, error) {
-	l := logic.NewLifeCircleLogic(ctx, s.svcCtx)
-	return l.LifeCircle(in)
+func (s *WorkerServer) LifeCircle(stream worker.Worker_LifeCircleServer) error {
+	l := logic.NewLifeCircleLogic(stream.Context(), s.svcCtx)
+	return l.LifeCircle(stream)
 }
 
-func (s *WorkerServer) StatusSync(ctx context.Context, in *worker.StatusSyncReq) (*worker.StatusSyncResp, error) {
-	l := logic.NewStatusSyncLogic(ctx, s.svcCtx)
-	return l.StatusSync(in)
+func (s *WorkerServer) StatusSync(stream worker.Worker_StatusSyncServer) error {
+	l := logic.NewStatusSyncLogic(stream.Context(), s.svcCtx)
+	return l.StatusSync(stream)
 }

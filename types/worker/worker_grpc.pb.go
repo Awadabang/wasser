@@ -22,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type WorkerClient interface {
-	LifeCircle(ctx context.Context, in *LifeCircleReq, opts ...grpc.CallOption) (*LifeCircleResp, error)
-	StatusSync(ctx context.Context, in *StatusSyncReq, opts ...grpc.CallOption) (*StatusSyncResp, error)
+	LifeCircle(ctx context.Context, opts ...grpc.CallOption) (Worker_LifeCircleClient, error)
+	StatusSync(ctx context.Context, opts ...grpc.CallOption) (Worker_StatusSyncClient, error)
 }
 
 type workerClient struct {
@@ -34,30 +34,74 @@ func NewWorkerClient(cc grpc.ClientConnInterface) WorkerClient {
 	return &workerClient{cc}
 }
 
-func (c *workerClient) LifeCircle(ctx context.Context, in *LifeCircleReq, opts ...grpc.CallOption) (*LifeCircleResp, error) {
-	out := new(LifeCircleResp)
-	err := c.cc.Invoke(ctx, "/worker.Worker/LifeCircle", in, out, opts...)
+func (c *workerClient) LifeCircle(ctx context.Context, opts ...grpc.CallOption) (Worker_LifeCircleClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Worker_ServiceDesc.Streams[0], "/worker.Worker/LifeCircle", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &workerLifeCircleClient{stream}
+	return x, nil
 }
 
-func (c *workerClient) StatusSync(ctx context.Context, in *StatusSyncReq, opts ...grpc.CallOption) (*StatusSyncResp, error) {
-	out := new(StatusSyncResp)
-	err := c.cc.Invoke(ctx, "/worker.Worker/StatusSync", in, out, opts...)
+type Worker_LifeCircleClient interface {
+	Send(*LifeCircleReq) error
+	Recv() (*LifeCircleResp, error)
+	grpc.ClientStream
+}
+
+type workerLifeCircleClient struct {
+	grpc.ClientStream
+}
+
+func (x *workerLifeCircleClient) Send(m *LifeCircleReq) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *workerLifeCircleClient) Recv() (*LifeCircleResp, error) {
+	m := new(LifeCircleResp)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *workerClient) StatusSync(ctx context.Context, opts ...grpc.CallOption) (Worker_StatusSyncClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Worker_ServiceDesc.Streams[1], "/worker.Worker/StatusSync", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &workerStatusSyncClient{stream}
+	return x, nil
+}
+
+type Worker_StatusSyncClient interface {
+	Send(*StatusSyncReq) error
+	Recv() (*StatusSyncResp, error)
+	grpc.ClientStream
+}
+
+type workerStatusSyncClient struct {
+	grpc.ClientStream
+}
+
+func (x *workerStatusSyncClient) Send(m *StatusSyncReq) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *workerStatusSyncClient) Recv() (*StatusSyncResp, error) {
+	m := new(StatusSyncResp)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // WorkerServer is the server API for Worker service.
 // All implementations must embed UnimplementedWorkerServer
 // for forward compatibility
 type WorkerServer interface {
-	LifeCircle(context.Context, *LifeCircleReq) (*LifeCircleResp, error)
-	StatusSync(context.Context, *StatusSyncReq) (*StatusSyncResp, error)
+	LifeCircle(Worker_LifeCircleServer) error
+	StatusSync(Worker_StatusSyncServer) error
 	mustEmbedUnimplementedWorkerServer()
 }
 
@@ -65,11 +109,11 @@ type WorkerServer interface {
 type UnimplementedWorkerServer struct {
 }
 
-func (UnimplementedWorkerServer) LifeCircle(context.Context, *LifeCircleReq) (*LifeCircleResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LifeCircle not implemented")
+func (UnimplementedWorkerServer) LifeCircle(Worker_LifeCircleServer) error {
+	return status.Errorf(codes.Unimplemented, "method LifeCircle not implemented")
 }
-func (UnimplementedWorkerServer) StatusSync(context.Context, *StatusSyncReq) (*StatusSyncResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method StatusSync not implemented")
+func (UnimplementedWorkerServer) StatusSync(Worker_StatusSyncServer) error {
+	return status.Errorf(codes.Unimplemented, "method StatusSync not implemented")
 }
 func (UnimplementedWorkerServer) mustEmbedUnimplementedWorkerServer() {}
 
@@ -84,40 +128,56 @@ func RegisterWorkerServer(s grpc.ServiceRegistrar, srv WorkerServer) {
 	s.RegisterService(&Worker_ServiceDesc, srv)
 }
 
-func _Worker_LifeCircle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LifeCircleReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(WorkerServer).LifeCircle(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/worker.Worker/LifeCircle",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkerServer).LifeCircle(ctx, req.(*LifeCircleReq))
-	}
-	return interceptor(ctx, in, info, handler)
+func _Worker_LifeCircle_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(WorkerServer).LifeCircle(&workerLifeCircleServer{stream})
 }
 
-func _Worker_StatusSync_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(StatusSyncReq)
-	if err := dec(in); err != nil {
+type Worker_LifeCircleServer interface {
+	Send(*LifeCircleResp) error
+	Recv() (*LifeCircleReq, error)
+	grpc.ServerStream
+}
+
+type workerLifeCircleServer struct {
+	grpc.ServerStream
+}
+
+func (x *workerLifeCircleServer) Send(m *LifeCircleResp) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *workerLifeCircleServer) Recv() (*LifeCircleReq, error) {
+	m := new(LifeCircleReq)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(WorkerServer).StatusSync(ctx, in)
+	return m, nil
+}
+
+func _Worker_StatusSync_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(WorkerServer).StatusSync(&workerStatusSyncServer{stream})
+}
+
+type Worker_StatusSyncServer interface {
+	Send(*StatusSyncResp) error
+	Recv() (*StatusSyncReq, error)
+	grpc.ServerStream
+}
+
+type workerStatusSyncServer struct {
+	grpc.ServerStream
+}
+
+func (x *workerStatusSyncServer) Send(m *StatusSyncResp) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *workerStatusSyncServer) Recv() (*StatusSyncReq, error) {
+	m := new(StatusSyncReq)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
 	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/worker.Worker/StatusSync",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WorkerServer).StatusSync(ctx, req.(*StatusSyncReq))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
 // Worker_ServiceDesc is the grpc.ServiceDesc for Worker service.
@@ -126,16 +186,20 @@ func _Worker_StatusSync_Handler(srv interface{}, ctx context.Context, dec func(i
 var Worker_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "worker.Worker",
 	HandlerType: (*WorkerServer)(nil),
-	Methods: []grpc.MethodDesc{
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "LifeCircle",
-			Handler:    _Worker_LifeCircle_Handler,
+			StreamName:    "LifeCircle",
+			Handler:       _Worker_LifeCircle_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 		{
-			MethodName: "StatusSync",
-			Handler:    _Worker_StatusSync_Handler,
+			StreamName:    "StatusSync",
+			Handler:       _Worker_StatusSync_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "protos/worker.proto",
 }

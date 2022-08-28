@@ -2,6 +2,9 @@ package logic
 
 import (
 	"context"
+	"io"
+	"log"
+	"runtime"
 
 	"github.com/Awadabang/wasser/internal/svc"
 	"github.com/Awadabang/wasser/types/worker"
@@ -23,8 +26,21 @@ func NewStatusSyncLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Status
 	}
 }
 
-func (l *StatusSyncLogic) StatusSync(in *worker.StatusSyncReq) (*worker.StatusSyncResp, error) {
-	// todo: add your logic here and delete this line
-
-	return &worker.StatusSyncResp{}, nil
+func (l *StatusSyncLogic) StatusSync(stream worker.Worker_StatusSyncServer) error {
+	log.Println("StatusSync Connect Established", runtime.NumGoroutine())
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			log.Println("EOF")
+			break
+		}
+		if err != nil {
+			log.Println(err)
+			break
+		}
+		log.Println(res)
+		continue
+	}
+	log.Println("StatusSync Release")
+	return nil
 }

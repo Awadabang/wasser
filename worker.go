@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/http"
+	_ "net/http/pprof"
 
 	"github.com/Awadabang/wasser/internal/config"
 	"github.com/Awadabang/wasser/internal/server"
@@ -35,5 +37,9 @@ func main() {
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
+	go func() {
+		http.ListenAndServe("127.0.0.1:8899", nil)
+	}()
 	s.Start()
+
 }

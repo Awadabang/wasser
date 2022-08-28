@@ -19,8 +19,8 @@ type (
 	StatusSyncResp = worker.StatusSyncResp
 
 	Worker interface {
-		LifeCircle(ctx context.Context, in *LifeCircleReq, opts ...grpc.CallOption) (*LifeCircleResp, error)
-		StatusSync(ctx context.Context, in *StatusSyncReq, opts ...grpc.CallOption) (*StatusSyncResp, error)
+		LifeCircle(ctx context.Context, opts ...grpc.CallOption) (worker.Worker_LifeCircleClient, error)
+		StatusSync(ctx context.Context, opts ...grpc.CallOption) (worker.Worker_StatusSyncClient, error)
 	}
 
 	defaultWorker struct {
@@ -34,12 +34,12 @@ func NewWorker(cli zrpc.Client) Worker {
 	}
 }
 
-func (m *defaultWorker) LifeCircle(ctx context.Context, in *LifeCircleReq, opts ...grpc.CallOption) (*LifeCircleResp, error) {
+func (m *defaultWorker) LifeCircle(ctx context.Context, opts ...grpc.CallOption) (worker.Worker_LifeCircleClient, error) {
 	client := worker.NewWorkerClient(m.cli.Conn())
-	return client.LifeCircle(ctx, in, opts...)
+	return client.LifeCircle(ctx, opts...)
 }
 
-func (m *defaultWorker) StatusSync(ctx context.Context, in *StatusSyncReq, opts ...grpc.CallOption) (*StatusSyncResp, error) {
+func (m *defaultWorker) StatusSync(ctx context.Context, opts ...grpc.CallOption) (worker.Worker_StatusSyncClient, error) {
 	client := worker.NewWorkerClient(m.cli.Conn())
-	return client.StatusSync(ctx, in, opts...)
+	return client.StatusSync(ctx, opts...)
 }

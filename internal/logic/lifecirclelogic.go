@@ -2,6 +2,9 @@ package logic
 
 import (
 	"context"
+	"io"
+	"log"
+	"runtime"
 
 	"github.com/Awadabang/wasser/internal/svc"
 	"github.com/Awadabang/wasser/types/worker"
@@ -23,8 +26,42 @@ func NewLifeCircleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LifeCi
 	}
 }
 
-func (l *LifeCircleLogic) LifeCircle(in *worker.LifeCircleReq) (*worker.LifeCircleResp, error) {
-	// todo: add your logic here and delete this line
-
-	return &worker.LifeCircleResp{}, nil
+func (l *LifeCircleLogic) LifeCircle(stream worker.Worker_LifeCircleServer) error {
+	log.Println("LifeCircle Connect Established", runtime.NumGoroutine())
+	n := 0
+	for {
+		res, err := stream.Recv()
+		if err == io.EOF {
+			log.Println("EOF")
+			break
+		}
+		if err != nil {
+			log.Println(err)
+			break
+		}
+		log.Println(res)
+		if res.Register {
+			stream.Send(&worker.LifeCircleResp{
+				Status: "OK",
+				Alive:  true,
+			})
+		}
+		if res.Alivecheck {
+			if n == 2 {
+				stream.Send(&worker.LifeCircleResp{
+					Status: "OK",
+					Alive:  false,
+				})
+			} else {
+				stream.Send(&worker.LifeCircleResp{
+					Status: "OK",
+					Alive:  true,
+				})
+			}
+			n++
+		}
+		continue
+	}
+	log.Println("LifeCircle Release")
+	return nil
 }

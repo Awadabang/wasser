@@ -11,6 +11,7 @@ message LifeCircleReq {
 
 message LifeCircleResp {
    string status = 1; 
+   bool alive = 2;
 }
 
 message StatusSyncReq {
@@ -22,6 +23,6 @@ message StatusSyncResp {
 }
 
 service Worker {
-    rpc LifeCircle(LifeCircleReq) returns (LifeCircleResp); 
-    rpc StatusSync(StatusSyncReq) returns (StatusSyncResp);
+    rpc LifeCircle(stream LifeCircleReq) returns (stream LifeCircleResp); 
+    rpc StatusSync(stream StatusSyncReq) returns (stream StatusSyncResp);
 }
