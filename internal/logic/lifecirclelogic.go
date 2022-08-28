@@ -28,6 +28,7 @@ func NewLifeCircleLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LifeCi
 
 func (l *LifeCircleLogic) LifeCircle(stream worker.Worker_LifeCircleServer) error {
 	log.Println("LifeCircle Connect Established", runtime.NumGoroutine())
+	l.svcCtx.WorkerHubMgr.LCRegister(stream)
 	n := 0
 	for {
 		res, err := stream.Recv()
