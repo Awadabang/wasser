@@ -35,6 +35,7 @@ func (c *Client) AliveCheck() {
 
 	for ; true; <-ticker.C {
 		err := c.LifeCircle.Send(&worker.LifeCircleReq{
+			WorkerId:   c.WorkerId,
 			Alivecheck: true,
 		})
 		if err != nil {

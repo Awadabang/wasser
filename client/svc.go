@@ -10,6 +10,8 @@ import (
 type Client struct {
 	LifeCircle worker.Worker_LifeCircleClient
 	StatusSync worker.Worker_StatusSyncClient
+
+	WorkerId string
 }
 
 func (c *Client) Run() {

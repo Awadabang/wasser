@@ -8,6 +8,7 @@ import (
 
 func (c *Client) Register() error {
 	err := c.LifeCircle.Send(&worker.LifeCircleReq{
+		WorkerId:   c.WorkerId,
 		Register:   true,
 		Alivecheck: false,
 	})

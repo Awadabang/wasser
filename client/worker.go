@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Awadabang/wasser/workerclient"
+	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
@@ -16,6 +17,8 @@ func main() {
 	defer cli.Conn().Close()
 
 	workerClient := workerclient.NewWorker(cli)
+
+	workerId := uuid.NewString()
 
 	ticker := time.NewTicker(5 * time.Second)
 	for ; true; <-ticker.C {
@@ -33,6 +36,8 @@ func main() {
 		client := &Client{
 			LifeCircle: lifeCircle,
 			StatusSync: statusSync,
+
+			WorkerId: workerId,
 		}
 
 		// 注册、健康检查

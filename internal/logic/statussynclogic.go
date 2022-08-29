@@ -28,7 +28,6 @@ func NewStatusSyncLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Status
 
 func (l *StatusSyncLogic) StatusSync(stream worker.Worker_StatusSyncServer) error {
 	log.Println("StatusSync Connect Established", runtime.NumGoroutine())
-	l.svcCtx.WorkerHubMgr.SSRegister(stream)
 	for {
 		res, err := stream.Recv()
 		if err == io.EOF {

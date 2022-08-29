@@ -5,8 +5,9 @@ package worker;
 option go_package = "./worker";
 
 message LifeCircleReq {
-    bool register = 1;
-    bool alivecheck = 2; 
+    string workerId = 1;
+    bool register = 2;
+    bool alivecheck = 3; 
 }
 
 message LifeCircleResp {
