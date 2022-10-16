@@ -4,13 +4,13 @@ Convert Struct to Map in Go.
 
 ``` go
 type Server struct {
-	Name  string `structs:"name"`
-	Age   int64  `structs:"age"`
+	Name  string `json:"name"`
+	Age   int64  `json:"age"`
 }
 
 s := `{"name": "alex"}`
 var server Server
-m, err := Struct2map([]byte(s), &server)
+m, err := Struct2Map([]byte(s), &server)
 if err != nil {
 	log.Fatalln(err)
 }

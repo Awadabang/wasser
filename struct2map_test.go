@@ -11,15 +11,15 @@ type Grade struct {
 }
 
 type Server struct {
-	Name  string `structs:"name"`
-	Age   int64  `structs:"age"`
-	Grade *Grade `structs:"grade"`
+	Name  string `json:"name"`
+	Age   int64  `json:"age"`
+	Grade *Grade `json:"grade"`
 }
 
 func TestStruct2Map(t *testing.T) {
 	s := `{"name": "alex", "grade": {"english":200}}`
 	var server Server
-	m, err := Struct2map([]byte(s), &server)
+	m, err := Struct2Map([]byte(s), &server)
 	if err != nil {
 		log.Fatalln(err)
 	}

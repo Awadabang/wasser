@@ -8,7 +8,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-func Struct2map(b []byte, s any) (map[string]any, error) {
+func Struct2Map(b []byte, s any) (map[string]any, error) {
 	result := make(map[string]any)
 	v := reflect.ValueOf(s)
 
@@ -35,7 +35,7 @@ func Struct2map(b []byte, s any) (map[string]any, error) {
 			continue
 		}
 
-		tag := field.Tag.Get("structs")
+		tag := field.Tag.Get("json")
 
 		// don't check if it's omitted
 		if tag == "-" {
